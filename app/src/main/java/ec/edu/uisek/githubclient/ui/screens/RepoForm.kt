@@ -34,23 +34,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ec.edu.uisek.githubclient.models.Repository
 import ec.edu.uisek.githubclient.ui.theme.GithubClientTheme
 import ec.edu.uisek.githubclient.viewmodels.RepoFormViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RepoForm(
+    repositoryToEdit: Repository? = null,
     onBackClick: () -> Unit = {},
     onSaveSuccess: () -> Unit = {},
     viewModel: RepoFormViewModel = viewModel()
 ) {
-
     val isLoading by viewModel.isLoading.collectAsState()
     val isSuccess by viewModel.isSuccess.collectAsState()
     val errorMsg by viewModel.errorMsg.collectAsState()
 
-    var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    val isEditMode = repositoryToEdit != null
+
+    var name by remember {
+        mutableStateOf(repositoryToEdit?.name ?: "")
+    }
+
+    var description by remember {
+        mutableStateOf(repositoryToEdit?.description ?: "")
+    }
 
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
@@ -63,7 +71,13 @@ fun RepoForm(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Nuevo Repositorio")
+                    Text(
+                        if (isEditMode) {
+                            "Editar Repositorio"
+                        } else {
+                            "Nuevo Repositorio"
+                        }
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -86,7 +100,6 @@ fun RepoForm(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
-
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -117,7 +130,18 @@ fun RepoForm(
 
             Button(
                 onClick = {
-                    viewModel.createRepo(name, description)
+                    if (isEditMode) {
+                        viewModel.updateRepo(
+                            oldName = repositoryToEdit!!.name,
+                            name = name,
+                            description = description
+                        )
+                    } else {
+                        viewModel.createRepo(
+                            name = name,
+                            description = description
+                        )
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = name.isNotBlank() && !isLoading
@@ -132,7 +156,13 @@ fun RepoForm(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Text("Guardando...")
+                    Text(
+                        if (isEditMode) {
+                            "Actualizando..."
+                        } else {
+                            "Guardando..."
+                        }
+                    )
 
                 } else {
 
@@ -144,7 +174,11 @@ fun RepoForm(
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        text = "Guardar",
+                        text = if (isEditMode) {
+                            "Actualizar"
+                        } else {
+                            "Guardar"
+                        },
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -167,10 +201,7 @@ fun RepoForm(
 @Preview(showBackground = true)
 @Composable
 fun RepoFormPreview() {
-
     GithubClientTheme {
-
         RepoForm()
-
     }
 }

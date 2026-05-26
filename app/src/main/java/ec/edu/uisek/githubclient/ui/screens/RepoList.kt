@@ -41,6 +41,11 @@ import ec.edu.uisek.githubclient.ui.components.RepoItem
 import ec.edu.uisek.githubclient.ui.theme.GithubClientTheme
 import ec.edu.uisek.githubclient.viewmodels.RepoListViewModel
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun RepoList(
@@ -121,11 +126,61 @@ fun SwipeRepoItem(
     onDelete: () -> Unit
 ) {
 
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             value == SwipeToDismissBoxValue.EndToStart
         }
     )
+
+    if (showDeleteDialog) {
+
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+            },
+
+            title = {
+                Text("Eliminar repositorio")
+            },
+
+            text = {
+                Text(
+                    "¿Seguro que deseas eliminar el repositorio \"${repository.name}\"?"
+                )
+            },
+
+            confirmButton = {
+
+                Button(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDelete()
+                    },
+
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Sí")
+                }
+            },
+
+            dismissButton = {
+
+                OutlinedButton(
+                    onClick = {
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     SwipeToDismissBox(
         state = dismissState,
@@ -147,6 +202,7 @@ fun SwipeRepoItem(
 
                 Button(
                     onClick = onEdit,
+
                     modifier = Modifier.padding(end = 8.dp),
 
                     colors = ButtonDefaults.buttonColors(
@@ -166,7 +222,9 @@ fun SwipeRepoItem(
                 }
 
                 Button(
-                    onClick = onDelete,
+                    onClick = {
+                        showDeleteDialog = true
+                    },
 
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error,

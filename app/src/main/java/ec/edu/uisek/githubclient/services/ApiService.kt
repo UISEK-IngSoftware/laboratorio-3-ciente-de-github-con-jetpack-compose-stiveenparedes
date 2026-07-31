@@ -1,17 +1,24 @@
 package ec.edu.uisek.githubclient.services
 
+import ec.edu.uisek.githubclient.models.GithubUser
 import ec.edu.uisek.githubclient.models.Repository
 import ec.edu.uisek.githubclient.models.RepositoryPayload
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.Response
 
 interface ApiService {
+
+    @GET("user")
+    suspend fun validateToken(
+        @Header("Authorization") token: String
+    ): Response<GithubUser>
 
     @GET("user/repos")
     suspend fun getRepositories(

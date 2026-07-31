@@ -3,15 +3,18 @@ package ec.edu.uisek.githubclient.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -52,7 +55,8 @@ fun RepoList(
     modifier: Modifier = Modifier,
     viewModel: RepoListViewModel = viewModel(),
     onNavigateToRepoForm: () -> Unit = {},
-    onEditRepo: (Repository) -> Unit = {}
+    onEditRepo: (Repository) -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
     val repos by viewModel.repos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -60,17 +64,33 @@ fun RepoList(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToRepoForm,
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                elevation = FloatingActionButtonDefaults.elevation(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Agregar"
-                )
+            Column(horizontalAlignment = Alignment.End) {
+                FloatingActionButton(
+                    onClick = onNavigateToRepoForm,
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    elevation = FloatingActionButtonDefaults.elevation(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Agregar"
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FloatingActionButton(
+                    onClick = onLogout,
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    elevation = FloatingActionButtonDefaults.elevation(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Cerrar sesión"
+                    )
+                }
             }
         }
     ) { innerPadding ->

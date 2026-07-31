@@ -4,11 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import ec.edu.uisek.githubclient.models.Repository
+import ec.edu.uisek.githubclient.services.AuthService
+import ec.edu.uisek.githubclient.services.RetrofitClient
+import ec.edu.uisek.githubclient.ui.screens.LoginForm
 import ec.edu.uisek.githubclient.ui.screens.RepoForm
 import ec.edu.uisek.githubclient.ui.screens.RepoList
 import ec.edu.uisek.githubclient.ui.theme.GithubClientTheme
@@ -20,13 +20,32 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
+        val authService = AuthService(this)
+        RetrofitClient.init(this)
+
         setContent {
             GithubClientTheme {
 
-                var currentScreen by remember { mutableStateOf("repoList") }
-                var selectedRepo by remember { mutableStateOf<Repository?>(null) }
+                var isLoggedIn by remember {
+                    mutableStateOf(authService.isLoggedIn())
+                }
+
+                var currentScreen by remember {
+                    mutableStateOf(if (isLoggedIn) "repoList" else "login")
+                }
+
+                var selectedRepo by remember {
+                    mutableStateOf<Repository?>(null)
+                }
 
                 when (currentScreen) {
+
+                    "login" -> LoginForm(
+                        onLoginSuccess = {
+                            isLoggedIn = true
+                            currentScreen = "repoList"
+                        }
+                    )
 
                     "repoList" -> RepoList(
                         onNavigateToRepoForm = {
@@ -36,6 +55,11 @@ class MainActivity : ComponentActivity() {
                         onEditRepo = { repo ->
                             selectedRepo = repo
                             currentScreen = "repoForm"
+                        },
+                        onLogout = {
+                            authService.logout()
+                            isLoggedIn = false
+                            currentScreen = "login"
                         }
                     )
 
